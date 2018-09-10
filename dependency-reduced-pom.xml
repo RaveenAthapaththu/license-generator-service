@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <artifactId>msf4j-service</artifactId>
+    <groupId>org.wso2.msf4j</groupId>
+    <version>2.6.2</version>
+    <relativePath>../pom.xml/pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.wso2.license.manager</groupId>
+  <artifactId>license-manager-service</artifactId>
+  <name>WSO2 MSF4J Microservice</name>
+  <version>1.0-SNAPSHOT</version>
+  <build>
+    <finalName>license-manager-microservice</finalName>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.21.0</version>
+        <configuration>
+          <systemPropertyVariables>
+            <maven.home>/usr/share/maven/bin</maven.home>
+          </systemPropertyVariables>
+        </configuration>
+      </plugin>
+      <plugin>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${maven.checkstyleplugin.version}</version>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>validate</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+            <configuration>
+              <configLocation>https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/checkstyle.xml</configLocation>
+              <suppressionsLocation>https://raw.githubusercontent.com/wso2/code-quality-tools/master/checkstyle/suppressions.xml</suppressionsLocation>
+              <encoding>UTF-8</encoding>
+              <consoleOutput>true</consoleOutput>
+              <failsOnError>true</failsOnError>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+  <properties>
+    <microservice.mainClass>org.wso2.internal.apps.license.manager.service.Application</microservice.mainClass>
+    <slf4j.version>1.7.5</slf4j.version>
+    <sun.mail.version>1.6.0</sun.mail.version>
+    <op4j.version>1.2</op4j.version>
+    <gson.version>2.3.1</gson.version>
+    <mysql.version>5.1.9</mysql.version>
+    <jsch.version>0.1.54</jsch.version>
+    <testng.version>6.9.10</testng.version>
+    <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
+    <commons.dbcp.version>2.2.0</commons.dbcp.version>
+    <commons.lang.version>2.6</commons.lang.version>
+  </properties>
+</project>
+
