@@ -76,7 +76,7 @@ public class AddLicenseServiceAPIImpl {
         JsonArray librariesJson = JsonUtils.getAttributesFromRequestBody(payload, "libraries");
         updateLicensesOfLicenseMissingJars(packDetails.getLicenseMissingComponentLibraries(), componentsJson);
         updateLicensesOfLicenseMissingJars(packDetails.getLicenseMissingLibraries(), librariesJson);
-        insertNewLicensesToDb(packDetails, username);
+        insertNewLicensesToDb(packDetails);
     }
 
     /**
@@ -98,11 +98,11 @@ public class AddLicenseServiceAPIImpl {
     /**
      * Insert new licenses for the jars into the database and send mail to the admin.
      *
-     * @param username user who added the licenses
+     * @param packDetails PackDetails obj
      * @throws LicenseManagerDataException if the data insertion fails
      * @throws MessagingException          if sending mail fails
      */
-    private void insertNewLicensesToDb(PackDetails packDetails, String username)
+    private void insertNewLicensesToDb(PackDetails packDetails)
             throws LicenseManagerDataException, MessagingException {
 
         Boolean isInsertionSuccess = false;
@@ -121,18 +121,12 @@ public class AddLicenseServiceAPIImpl {
             log.error("Failed to close the database connection while adding new licenses for the jars. " +
                     e.getMessage(), e);
         } finally {
-            log.info("Sendind email");
-            // Send an email to the admin if there are any new licenses added.
-//            if (newLicenseEntryComponentList != null && newLicenseEntryComponentList.size() > 0 ||
-//                    newLicenseEntryLibraryList != null && newLicenseEntryLibraryList.size() > 0) {
-//                EmailUtils.sendEmail(username, newLicenseEntryComponentList, newLicenseEntryLibraryList,
-//                        isInsertionSuccess);
-//            }
+            //TODO send email
         }
     }
 
     private List<License> insertComponentLicenses(List<LibraryDetails> componentList, int productId,
-                                                          LicenseDAOImpl licenseDAO) throws
+                                                  LicenseDAOImpl licenseDAO) throws
             SQLException {
 
         List<License> newLicenseEntryComponentList = new ArrayList<>();
@@ -142,15 +136,12 @@ public class AddLicenseServiceAPIImpl {
             String componentName = licenseMissingJar.getJarContent().getName();
             String licenseKey = licenseMissingJar.getLicenseKey();
             String version = licenseMissingJar.getVersion();
-            //licenseDAO.insertComponent(name, componentName, version);
-            //licenseDAO.insertProductComponent(componentName, productId);
-            try(LibraryDAOImpl libraryDAO = new LibraryDAOImpl()){
+            try (LibraryDAOImpl libraryDAO = new LibraryDAOImpl()) {
                 int libId = libraryDAO.getLibraryID(licenseMissingJar);
-
 
                 licenseDAO.insertLibraryLicense(licenseKey, libId);
 
-            } catch (IOException e){
+            } catch (IOException e) {
                 log.info("IO Exception", e);
             }
 
@@ -163,10 +154,9 @@ public class AddLicenseServiceAPIImpl {
     }
 
     private List<License> insertLibraryLicenses(List<LibraryDetails> libraryList, int productId,
-                                                        LicenseDAOImpl licenseDAO) throws SQLException {
+                                                LicenseDAOImpl licenseDAO) throws SQLException {
 
         List<License> newLicenseEntryLibraryList = new ArrayList<>();
-
         for (LibraryDetails licenseMissingJar : libraryList) {
             String name = licenseMissingJar.getProduct();
             String libraryFileName = licenseMissingJar.getJarContent().getName();
@@ -178,16 +168,14 @@ public class AddLicenseServiceAPIImpl {
 
             if (licenseMissingJar.getJarContent().getParent() != null) {
                 parent = licenseMissingJar.getParent();
-                //componentKey = parent.getJarContent().getName();
             }
 
-            try(LibraryDAOImpl libraryDAO = new LibraryDAOImpl()){
+            try (LibraryDAOImpl libraryDAO = new LibraryDAOImpl()) {
                 int libId = libraryDAO.getLibraryID(licenseMissingJar);
 
+                licenseDAO.insertLibraryLicense(licenseKey, libId);
 
-            licenseDAO.insertLibraryLicense(licenseKey, libId);
-
-            } catch (IOException e){
+            } catch (IOException e) {
                 log.info("IO Exception", e);
             }
 
@@ -198,6 +186,5 @@ public class AddLicenseServiceAPIImpl {
         }
         return newLicenseEntryLibraryList;
     }
-
 
 }

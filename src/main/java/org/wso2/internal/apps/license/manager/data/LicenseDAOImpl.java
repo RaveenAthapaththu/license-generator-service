@@ -110,7 +110,6 @@ public class LicenseDAOImpl implements LicenseDAO, Closeable {
     @Override
     public String getLicenseKeyByID(int licID) throws SQLException {
 
-        log.info("getLicenseKeyByID");
         String key;
         try (PreparedStatement preparedStatement = connection.prepareStatement(SqlConstants.SELECT_LICENSE_KEY)) {
             preparedStatement.setInt(1, licID);
@@ -164,7 +163,6 @@ public class LicenseDAOImpl implements LicenseDAO, Closeable {
     @Override
     public void insertLibraryLicense(String key, int libID) throws SQLException {
 
-        log.info("UPDATE lib with license");
         int licID = getLicenseKey(key);
         try (PreparedStatement preparedStatement = connection.prepareStatement(SqlConstants.INSERT_LIBRARY_LICENSE,
                 Statement.RETURN_GENERATED_KEYS)) {

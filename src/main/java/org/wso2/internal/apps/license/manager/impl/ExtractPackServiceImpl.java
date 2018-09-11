@@ -50,7 +50,6 @@ public class ExtractPackServiceImpl {
         taskProgress.setStepNumber(Constants.PACK_EXTRACTION_STEP_ID);
         taskProgress.setMessage("Pack extraction has been started");
 
-        //TODO Thread to start download and extraction
         new Thread(() -> {
             taskProgress.setExecutingThreadId(Thread.currentThread().getId());
             String pathToStorage = SystemVariableUtil.getValue(Constants.FILE_DOWNLOAD_PATH, null);
@@ -60,14 +59,11 @@ public class ExtractPackServiceImpl {
 
             try {
                 // Initiate SFTP connection and download file
-                log.info("ftp connection");
-                log.info("pack to download : " + packName);
                 FtpConnectionManager ftpConnectionManager = FtpConnectionManager.getFtpConnectionManager();
                 ftpConnectionManager.downloadFileFromFtpServer(packName);
                 ftpConnectionManager.closeSftpChannel();
 
                 // Unzip the downloaded file.
-                log.info("unzipping file");
                 String zipFilePath = pathToStorage + packName;
                 String filePath = zipFilePath.substring(0, zipFilePath.lastIndexOf('.'));
                 File zipFile = new File(zipFilePath);
@@ -76,7 +72,6 @@ public class ExtractPackServiceImpl {
                 ZipHandler.unzip(zipFile.getAbsolutePath(), dir.getAbsolutePath());
 
                 // Extract jars from the pack.
-                log.info("extract jars");
                 taskProgress.setMessage("Extracting jars");
                 PackDetails packDetails = jarFileHandler.extractJarsRecursively(filePath);
                 taskProgress.setMessage("JarFile.java extraction complete");

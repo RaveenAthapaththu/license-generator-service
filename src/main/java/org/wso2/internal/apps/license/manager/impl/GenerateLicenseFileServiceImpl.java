@@ -90,7 +90,6 @@ public class GenerateLicenseFileServiceImpl {
                 licenseText += formatString;
             }
             FileWriter fw = new FileWriter(packPath + File.separator + "LICENSE(" + product + "-" + version + ").TXT");
-                log.info("license text" + licenseText);
                 fw.write(licenseText);
                 fw.close();
         } catch (SQLException e) {

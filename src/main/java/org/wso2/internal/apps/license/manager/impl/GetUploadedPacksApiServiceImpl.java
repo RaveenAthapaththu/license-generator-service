@@ -37,7 +37,6 @@ public class GetUploadedPacksApiServiceImpl {
 
     private static final Logger log = LoggerFactory.getLogger(GetUploadedPacksApiServiceImpl.class);
 
-
     /**
      * Get the list of zip packs uploaded to the FTP server.
      *
@@ -46,14 +45,12 @@ public class GetUploadedPacksApiServiceImpl {
      */
     public JsonArray getListOfPacksName() throws LicenseManagerConfigurationException {
 
-        log.info("getListofPackname");
         ArrayList<String> listOfPacks;
         JsonArray listOfPacksAsJson;
         FtpConnectionManager ftpConnectionManager = FtpConnectionManager.getFtpConnectionManager();
         listOfPacks = ftpConnectionManager.listFilesInFtpServer();
         ftpConnectionManager.closeSftpChannel();
         listOfPacksAsJson = JsonUtils.getListOfPacksUploadedAsJson(listOfPacks);
-        log.info("returning listofpack");
         return listOfPacksAsJson;
     }
 }

@@ -176,7 +176,6 @@ public class LibraryDAOImpl implements LibraryDAO, Closeable {
     @Override
     public List<LibraryDetails> getAllLibrariesForLicense(ArrayList<Integer> libIDs) {
 
-
         return null;
     }
 }

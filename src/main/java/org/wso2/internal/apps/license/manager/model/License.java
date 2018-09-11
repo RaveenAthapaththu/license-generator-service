@@ -21,7 +21,7 @@
 package org.wso2.internal.apps.license.manager.model;
 
 /**
- *  * This class contains properties and operations related to a license
+ * * This class contains properties and operations related to a license
  */
 public class License {
 

@@ -52,42 +52,27 @@ public class JarFileHandler {
      */
     public PackDetails extractJarsRecursively(String file) throws LicenseManagerRuntimeException {
 
-        log.info("Extracting jars recursivly");
         //check for the file
         if (StringUtils.isEmpty(file) || !new File(file).exists() || !new File(file).isDirectory()) {
             throw new LicenseManagerRuntimeException("Folder is not found in the location");
         }
 
         //create a folder to extract content
-        log.info("create a folder to extract content");
         PackDetails packDetails = new PackDetails();
         String targetFolder = new File(file).getName();
         String uuid = UUID.randomUUID().toString();
         String tempFolderToHoldJars = new File(file).getParent() + File.separator + uuid;
 
         //Get all the JARs inside the zip
-        log.info("Get all the JARs inside the zip");
         List<LibraryDetails> jarFilesInPack = findDirectJars(file);
 
-        for (LibraryDetails libraryDetails : jarFilesInPack){
-            log.info("ALL jars IN PACK" + libraryDetails.getJarContent().getName());
-            log.info("ALL jars IN PACK2" + libraryDetails.getProduct());
-        }
-
         //Get all the JARs with faulty name from All the JARs found
-        log.info("Get all the JARs with faulty name from All the JARs found");
         List<LibraryDetails> faultyNamedJars = findAllJars(tempFolderToHoldJars, jarFilesInPack);
-        for (LibraryDetails libraryDetails : faultyNamedJars){
-            log.info("ALL Faulty named jars IN PACK");
-            log.info(libraryDetails.getFileName());
-        }
-        // LicenseManagerUtils.deleteFolder(tempFolderToHoldJars);
 
         packDetails.setPackName(getName(targetFolder));
         packDetails.setPackVersion(getVersion(targetFolder));
         packDetails.setLibFilesInPack(jarFilesInPack);
         packDetails.setFaultyNamedLibs(faultyNamedJars);
-        log.info("returning pack details");
         return packDetails;
     }
 
@@ -98,7 +83,6 @@ public class JarFileHandler {
      */
     private List<LibraryDetails> findDirectJars(String path) {
 
-        //remove duplicates?
         List<File> directZips = find(path);
         List<LibraryDetails> listOfDirectJarsInPack = new ArrayList<>();
 
@@ -110,20 +94,17 @@ public class JarFileHandler {
     }
 
     /**
-     *
-     * @param file sd
-     * @return d
+     * @param file Jar File
+     * @return boolean is file JAR / MAR
      */
     private static boolean accept(File file) {
-
         //is a file a JAR or MAR ?
         return file.getName().endsWith(".jar") || file.getName().endsWith(".mar");
     }
 
     /**
-     *
-     * @param path d
-     * @return d
+     * @param path Folder Path
+     * @return List of jars found
      */
     private List<File> find(String path) {
 
@@ -186,7 +167,6 @@ public class JarFileHandler {
      */
     private static String getName(String name) {
 
-        //TODO: Handle bad names
         String extractedName = null;
 
         for (int i = 0; i < name.length(); i++) {
@@ -222,7 +202,6 @@ public class JarFileHandler {
     }
 
     /**
-     *
      * @param filename d
      * @return d
      */
@@ -360,7 +339,6 @@ public class JarFileHandler {
      */
     public static List<LibraryDetails> removeDuplicates(List<LibraryDetails> faultyNamedJars) {
 
-        log.info("removing duplicates started");
         List<LibraryDetails> faultyNamedUniqueJarFiles = new ArrayList<>();
         for (LibraryDetails jarFile : faultyNamedJars) {
             boolean newJar = true;
@@ -373,7 +351,6 @@ public class JarFileHandler {
                 faultyNamedUniqueJarFiles.add(jarFile);
             }
         }
-        log.info("returning faulty named unique jars");
         return faultyNamedUniqueJarFiles;
     }
 

@@ -44,6 +44,7 @@ import java.util.zip.ZipFile;
 public class ZipHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ZipHandler.class);
+
     /**
      * Static function to unzip a file to a given location.
      *
@@ -53,7 +54,6 @@ public class ZipHandler {
      */
     public static void unzip(String infile, String outFolder) throws LicenseManagerRuntimeException {
 
-        //TODO check
         Enumeration entries;
 
         try (ZipFile zipFile = new ZipFile(infile)) {

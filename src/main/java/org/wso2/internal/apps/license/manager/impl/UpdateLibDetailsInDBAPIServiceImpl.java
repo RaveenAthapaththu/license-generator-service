@@ -74,17 +74,14 @@ public class UpdateLibDetailsInDBAPIServiceImpl {
     }
 
     /**
-     *
-     * @param jarsWithDefinedNames d
-     * @param taskProgress s
-     * @throws LicenseManagerDataException w
+     * @param jarsWithDefinedNames Array of Jars with identified names
+     * @param taskProgress         TaskProgress obj
+     * @throws LicenseManagerDataException if update fails
      */
     private void updateJarInfo(JsonArray jarsWithDefinedNames, TaskProgress taskProgress) throws
             LicenseManagerDataException {
 
-        log.info("update faulty named list");
         updateFaultyNamedListOfJars(taskProgress.getData(), jarsWithDefinedNames);
-        log.info("enters to DB");
         enterJarsIntoDB(taskProgress);
 
     }
@@ -98,7 +95,6 @@ public class UpdateLibDetailsInDBAPIServiceImpl {
     private void updateFaultyNamedListOfJars(PackDetails packDetails, JsonArray jarsWithDefinedNames) {
 
         // Define the name and the version from the user input
-
         for (int i = 0; i < jarsWithDefinedNames.size(); i++) {
             JsonObject jar = jarsWithDefinedNames.get(i).getAsJsonObject();
             int index = jar.get("index").getAsInt();
@@ -120,17 +116,15 @@ public class UpdateLibDetailsInDBAPIServiceImpl {
     private void enterJarsIntoDB(TaskProgress taskProgress) {
 
         int productID = 0;
-        log.info("enter to db in");
         PackDetails packDetails = taskProgress.getData();
 
-        try(ProductDAOImpl productDAO = new ProductDAOImpl()){
+        try (ProductDAOImpl productDAO = new ProductDAOImpl()) {
             productID = productDAO.getProductID(packDetails.getPackName(), packDetails.getPackVersion());
 
-            if (productID < 0){
-                log.info("product id " + productID);
-               productID = productDAO.insertProduct(packDetails.getPackName(), packDetails.getPackVersion());
+            if (productID < 0) {
+                productID = productDAO.insertProduct(packDetails.getPackName(), packDetails.getPackVersion());
             }
-        } catch (SQLException | IOException e){
+        } catch (SQLException | IOException e) {
             log.info("Error occured while adding Product", e);
         }
 
@@ -139,14 +133,12 @@ public class UpdateLibDetailsInDBAPIServiceImpl {
 
         //check if the license available for the jar file x
         //jar x -> unq(name , ver, type)
-        for (LibraryDetails libraryDetails : packDetails.getLibFilesInPack()){
+        for (LibraryDetails libraryDetails : packDetails.getLibFilesInPack()) {
             String name = libraryDetails.getJarContent().getName();
             String version = libraryDetails.getVersion();
             String type = libraryDetails.getType();
 
-            try(ProductDAOImpl productDAO = new ProductDAOImpl()) {
-
-
+            try (ProductDAOImpl productDAO = new ProductDAOImpl()) {
 
                 try (LibraryDAOImpl libraryDAO = new LibraryDAOImpl()) {
                     //insert to db if not present
@@ -154,34 +146,29 @@ public class UpdateLibDetailsInDBAPIServiceImpl {
                     int prodID = productDAO.getProductID(packDetails.getPackName(), packDetails.getPackVersion());
                     int libID = libraryDAO.getLibraryID(libraryDetails);
 
-                    log.info("product id & Library ID" + productID + libID);
-                    productDAO.insertLibraryProduct(libID,prodID);
-
-                    //update libs to map
+                    productDAO.insertLibraryProduct(libID, prodID);
                 }
 
-                try(LicenseDAOImpl licenseDAO = new LicenseDAOImpl()){
+                try (LicenseDAOImpl licenseDAO = new LicenseDAOImpl()) {
                     //check if license available
                     boolean isLicenseExist = licenseDAO.checkLicense(libraryDetails);
 
-                    if (!isLicenseExist && libraryDetails.getType().equals("wso2")){
+                    if (!isLicenseExist && libraryDetails.getType().equals("wso2")) {
                         licenseMissingComponents.add(libraryDetails);
-                    } else if(!isLicenseExist){
+                    } else if (!isLicenseExist) {
                         licenseMissingLibraries.add(libraryDetails);
                     }
 
                 }
 
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 log.info("SQL error occurred", e);
-            } catch (IOException e){
+            } catch (IOException e) {
                 log.info("IO error occurred", e);
             }
         }
 
-        log.info("pack licensce missing details are set");
         packDetails.setPackId(productID);
-        log.info("LM libraries are set");
         packDetails.setLicenseMissingComponentLibraries(licenseMissingComponents);
         packDetails.setLicenseMissingLibraries(licenseMissingLibraries);
 

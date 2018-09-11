@@ -23,7 +23,7 @@ package org.wso2.internal.apps.license.manager.model;
 import java.io.File;
 
 /**
- *  * This class contains properties and operations related to a Library (Jar)
+ * * This class contains properties and operations related to a Library (Jar)
  */
 public class LibraryDetails {
 

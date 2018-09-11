@@ -24,7 +24,9 @@ import org.wso2.msf4j.MicroservicesRunner;
  * @since 1.0-SNAPSHOT
  */
 public class Application {
+
     public static void main(String[] args) {
+
         new MicroservicesRunner()
                 .deploy(new LicenseManagerServiceEndpoint())
                 .start();

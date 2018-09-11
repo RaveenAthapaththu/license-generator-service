@@ -23,7 +23,7 @@ package org.wso2.internal.apps.license.manager.model;
 import java.util.List;
 
 /**
- *  * This class contains properties and operations related to a extracted pack
+ * * This class contains properties and operations related to a extracted pack
  */
 public class PackDetails {
 

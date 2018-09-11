@@ -78,7 +78,6 @@ public class LicenseManagerServiceEndpoint {
     public Response getAllUploadedPacks() {
 
         JsonObject responseJson = new JsonObject();
-        log.info("receving uploaded packs.");
 
         try {
             // Obtain the list of the available zip files.
@@ -100,9 +99,9 @@ public class LicenseManagerServiceEndpoint {
     /**
      * Start the downloading and extracting the selected pack in a new thread.
      *
-     * @param request      Post request
-     * @param username     logged user
-     * @param payload selected pack
+     * @param request  Post request
+     * @param username logged user
+     * @param payload  selected pack
      * @return success/failure of starting thread
      */
     @POST
@@ -113,15 +112,10 @@ public class LicenseManagerServiceEndpoint {
                                                @QueryParam("username") String username,
                                                String payload) {
 
-        log.info("in: extractJarsForSelectedPack");
-
-
         JsonParser jsonParser = new JsonParser();
         JsonElement jsonElement = jsonParser.parse(payload);
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         String selectedPack = jsonObject.get("packName").getAsString();
-
-        log.info("extracted pack name : " + selectedPack);
 
         if (TaskHandler.checkForAlreadyRunningTask(selectedPack)) {
             log.info("selected pack failed, already running pack");
@@ -134,16 +128,12 @@ public class LicenseManagerServiceEndpoint {
                     .build();
         } else {
 
-            log.info("starting extraction");
-            log.info("User and packname : =====" + username + "pack " + selectedPack);
             TaskProgress taskProgress = extractPackService.startPackExtractionProcess(username, selectedPack);
-
             JsonObject responseJson = new JsonObject();
             responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.SUCCESS);
             responseJson.addProperty(Constants.RESPONSE_STATUS, Constants.RUNNING);
             responseJson.addProperty(Constants.RESPONSE_MESSAGE, taskProgress.getMessage());
 
-            log.info("Extraction in progress?");
             return Response.ok(responseJson, MediaType.APPLICATION_JSON)
                     .header(ACCESS_CONTROL_HEADER, true)
                     .build();
@@ -164,23 +154,18 @@ public class LicenseManagerServiceEndpoint {
                                        @QueryParam("username") String username,
                                        @PathParam("packName") String packName) {
 
-        log.info("get faulty named jars");
-        log.info("User and packname : =====" + username + "pack " + packName);
         TaskProgress taskProgress = TaskHandler.getTaskByPackName(packName);
         JsonObject responseJson = new JsonObject();
         JsonArray faultyNamedJars;
         String statusMessage = taskProgress.getMessage();
 
         if (taskProgress.getStatus().equals(Constants.COMPLETE)) {
-            log.info("removing duplicates ");
             List<LibraryDetails> errorJarFileList = JarFileHandler.removeDuplicates(taskProgress.getData().getFaultyNamedLibs());
-            log.info("Getting faulty named jars");
             faultyNamedJars = JsonUtils.getFaultyNamedJarsAsJsonArray(errorJarFileList);
             responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.SUCCESS);
             responseJson.addProperty(Constants.RESPONSE_MESSAGE, statusMessage);
             responseJson.add(Constants.RESPONSE_DATA, faultyNamedJars);
         } else {
-            log.info("Not complete?");
             responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.ERROR);
             responseJson.addProperty(Constants.RESPONSE_MESSAGE, "Failed to get data");
         }
@@ -193,9 +178,9 @@ public class LicenseManagerServiceEndpoint {
     /**
      * Submit the names and versions for the faulty named jars and identifies the license missing jars.
      *
-     * @param request       POST request
-     * @param username      logged user
-     * @param payload list of jars with new names and version
+     * @param request  POST request
+     * @param username logged user
+     * @param payload  list of jars with new names and version
      * @return list of jars in which the licenses are missing
      */
     @POST
@@ -205,13 +190,11 @@ public class LicenseManagerServiceEndpoint {
     public Response updateNameAndVersionOfJars(@Context Request request,
                                                @QueryParam("username") String username, String payload) {
 
-        log.info("Update name and version in");
         JsonParser jsonParser = new JsonParser();
         JsonElement jsonElement = jsonParser.parse(payload);
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         String selectedPack = jsonObject.get("packName").getAsString();
 
-        log.info("Update name and Version started with" + selectedPack);
         TaskProgress taskProgress = updateLibDetails.startUpdatingDatabase(selectedPack, JsonUtils
                 .getAttributesFromRequestBody(payload, "jars"));
         JsonObject responseJson = new JsonObject();
@@ -228,7 +211,7 @@ public class LicenseManagerServiceEndpoint {
      * Get the long running task progress.
      *
      * @param request  HTTP request object.
-     * @param packName  of the pack.
+     * @param packName of the pack.
      * @return The API response
      */
     @GET
@@ -237,14 +220,11 @@ public class LicenseManagerServiceEndpoint {
     public Response getStatusOfLongRunningTasks(@Context Request request,
                                                 @PathParam("packName") String packName) {
 
-        log.info("pack name from long tasks =======" +  packName);
         TaskProgress taskProgress = TaskHandler.getTaskByPackName(packName);
         JsonObject responseJson = new JsonObject();
         String statusMessage = taskProgress.getMessage();
 
-        log.info("checking Longer running tasks");
         // Build the response based on the status of the task.
-        log.info("status " + taskProgress.getStatus());
         switch (taskProgress.getStatus()) {
 
             case Constants.COMPLETE:
@@ -286,7 +266,6 @@ public class LicenseManagerServiceEndpoint {
                                           @QueryParam("username") String username,
                                           @PathParam("packName") String packName) {
 
-        log.info("IN license missing jar");
         TaskProgress taskProgress = TaskHandler.getTaskByPackName(packName);
         JsonObject responseJson = new JsonObject();
         PackDetails packDetails = taskProgress.getData();
@@ -299,13 +278,11 @@ public class LicenseManagerServiceEndpoint {
                     (packDetails.getLicenseMissingComponentLibraries()));
             responseJson.add(Constants.LICENSE_MISSING_LIBRARIES, JsonUtils.getLicenseMissingJarsAsJsonArray
                     (packDetails.getLicenseMissingLibraries()));
-            log.info("Misiing jars got");
         } else {
             responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.ERROR);
             responseJson.addProperty(Constants.RESPONSE_MESSAGE, "Failed to get data");
         }
 
-        log.info("returning L missing jars");
         return Response.ok(responseJson, MediaType.APPLICATION_JSON)
                 .header("Access-Control-Allow-Credentials", true)
                 .build();
@@ -327,7 +304,6 @@ public class LicenseManagerServiceEndpoint {
                                          @QueryParam("username") String username,
                                          String stringPayload) {
 
-        log.info("NEW license IN");
         JsonParser jsonParser = new JsonParser();
         JsonElement jsonElement = jsonParser.parse(stringPayload);
         JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -356,7 +332,6 @@ public class LicenseManagerServiceEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllLicenseInformation(@Context Request request) {
 
-        log.info("IN available license");
         JsonObject responseJson = new JsonObject();
 
         try {
@@ -388,7 +363,6 @@ public class LicenseManagerServiceEndpoint {
                                         @QueryParam("username") String username,
                                         String stringPayload) {
 
-        log.info("NEW license IN");
         JsonParser jsonParser = new JsonParser();
         JsonElement jsonElement = jsonParser.parse(stringPayload);
         JsonObject jsonObject = jsonElement.getAsJsonObject();
@@ -435,8 +409,6 @@ public class LicenseManagerServiceEndpoint {
                                        @QueryParam("username") String username,
                                        @PathParam("packName") String packName) {
 
-        log.info("DOWNLOADING TEXT file");
-
         String mountPath = SystemVariableUtil.getValue(Constants.FILE_DOWNLOAD_PATH, null);
         PackDetails packDetails = TaskHandler.getTaskByPackName(packName).getData();
         String productName = packDetails.getPackName();
@@ -445,10 +417,9 @@ public class LicenseManagerServiceEndpoint {
         File file = Paths.get(mountPath, fileName).toFile();
         if (file.exists()) {
             // Clean the storage.
-           ZipHandler.cleanFileStorage(productName + "-" + productVersion, mountPath);
+            ZipHandler.cleanFileStorage(productName + "-" + productVersion, mountPath);
             TaskHandler.deleteTaskByPackName(packName);
 
-            log.info("FILE " + file );
             return Response.ok(file)
                     .header("Access-Control-Allow-Credentials", true)
                     .build();

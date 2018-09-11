@@ -28,7 +28,7 @@ public class SqlConstants {
     /**
      * Private constructor to hide public constructor
      */
-    private SqlConstants(){
+    private SqlConstants() {
 
     }
 

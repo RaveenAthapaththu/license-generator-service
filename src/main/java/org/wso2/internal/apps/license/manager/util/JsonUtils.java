@@ -42,11 +42,12 @@ public class JsonUtils {
     /**
      * Private constructor to hide th public one.
      */
-    private JsonUtils (){
+    private JsonUtils() {
 
     }
 
     private static final Logger log = LoggerFactory.getLogger(JsonUtils.class);
+
     /**
      * Create a json array from the list of uploaded pack.
      * {name : nameOfThePack}
@@ -84,10 +85,6 @@ public class JsonUtils {
             currentJar.addProperty("name", errorJarFileList.get(i).getProduct());
             currentJar.addProperty("version", errorJarFileList.get(i).getVersion());
             faultyNamedJars.add(currentJar);
-        }
-        log.info("returning faulty named jars");
-        for (JsonElement ld : faultyNamedJars){
-            log.info("name" + ld.getAsJsonObject().get("name"));
         }
         return faultyNamedJars;
     }
@@ -138,13 +135,10 @@ public class JsonUtils {
      */
     public static JsonArray getLicenseMissingJarsAsJsonArray(List<LibraryDetails> licenseMissingJars) {
 
-        log.info("JSON util in license missing");
-        log.info("JSON ARRAY" + licenseMissingJars.size());
         JsonArray componentJsonArray = new JsonArray();
         for (int i = 0; i < licenseMissingJars.size(); i++) {
             JsonObject licenseMissingJar = new JsonObject();
             licenseMissingJar.addProperty("index", i);
-            log.info("name" + licenseMissingJars.get(i).getJarContent().getName());
             licenseMissingJar.addProperty("name", licenseMissingJars.get(i).getJarContent().getName());
             licenseMissingJar.addProperty("version", licenseMissingJars.get(i).getVersion());
             licenseMissingJar.addProperty("type", licenseMissingJars.get(i).getType());
@@ -155,6 +149,5 @@ public class JsonUtils {
 
         return componentJsonArray;
     }
-
 
 }
