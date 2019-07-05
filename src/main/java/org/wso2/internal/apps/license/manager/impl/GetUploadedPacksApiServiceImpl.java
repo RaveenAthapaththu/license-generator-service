@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.internal.apps.license.manager.connector.FtpConnectionManager;
 import org.wso2.internal.apps.license.manager.exception.LicenseManagerConfigurationException;
-import org.wso2.internal.apps.license.manager.service.LicenseManagerServiceEndpoint;
 import org.wso2.internal.apps.license.manager.util.JsonUtils;
 
 import java.util.ArrayList;

@@ -40,6 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.mail.MessagingException;
 
+/**
+ * Add  new licenses
+ */
 public class AddLicenseServiceAPIImpl {
 
     private static final Logger log = LoggerFactory.getLogger(AddLicenseServiceAPIImpl.class);
@@ -132,13 +135,10 @@ public class AddLicenseServiceAPIImpl {
         List<License> newLicenseEntryComponentList = new ArrayList<>();
 
         for (LibraryDetails licenseMissingJar : componentList) {
-            String name = licenseMissingJar.getProduct();
             String componentName = licenseMissingJar.getJarContent().getName();
             String licenseKey = licenseMissingJar.getLicenseKey();
-            String version = licenseMissingJar.getVersion();
             try (LibraryDAOImpl libraryDAO = new LibraryDAOImpl()) {
                 int libId = libraryDAO.getLibraryID(licenseMissingJar);
-
                 licenseDAO.insertLibraryLicense(licenseKey, libId);
 
             } catch (IOException e) {
@@ -158,12 +158,8 @@ public class AddLicenseServiceAPIImpl {
 
         List<License> newLicenseEntryLibraryList = new ArrayList<>();
         for (LibraryDetails licenseMissingJar : libraryList) {
-            String name = licenseMissingJar.getProduct();
             String libraryFileName = licenseMissingJar.getJarContent().getName();
             String licenseKey = licenseMissingJar.getLicenseKey();
-            String version = licenseMissingJar.getVersion();
-            String type = licenseMissingJar.getType();
-            String componentKey = null;
             LibraryDetails parent = null;
 
             if (licenseMissingJar.getJarContent().getParent() != null) {

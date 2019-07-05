@@ -29,6 +29,9 @@ import org.wso2.internal.apps.license.manager.exception.LicenseManagerDataExcept
 import java.io.IOException;
 import java.sql.SQLException;
 
+/**
+ * Get Licenses
+ */
 public class GetLicenseServiceImpl {
 
     private static final Logger log = LoggerFactory.getLogger(GetLicenseServiceImpl.class);

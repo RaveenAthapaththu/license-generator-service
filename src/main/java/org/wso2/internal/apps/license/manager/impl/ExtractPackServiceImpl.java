@@ -43,6 +43,12 @@ public class ExtractPackServiceImpl {
 
     private static final Logger log = LoggerFactory.getLogger(ExtractPackServiceImpl.class);
 
+    /**
+     *
+     * @param username Logged in user
+     * @param packName Name of the uploaded pack
+     * @return
+     */
     public TaskProgress startPackExtractionProcess(String username, String packName) {
 
         //creating new TaskProgress obj to keep track of the process
@@ -84,9 +90,12 @@ public class ExtractPackServiceImpl {
                 taskProgress.setMessage("Failed to connect to FTP server");
                 log.info("FTP server error", e);
             } catch (LicenseManagerRuntimeException e) {
+                taskProgress.setStatus(Constants.FAILED);
+                taskProgress.setMessage("Pack contains corrupted Files, Please re-upload a different pack");
                 log.info("Extraction Process Failed", e);
             }
         }).start();
+
         return taskProgress;
     }
 

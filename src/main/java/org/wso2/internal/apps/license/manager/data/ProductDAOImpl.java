@@ -23,18 +23,20 @@ package org.wso2.internal.apps.license.manager.data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.internal.apps.license.manager.connector.DatabaseConnectionPool;
-import org.wso2.internal.apps.license.manager.model.Product;
 import org.wso2.internal.apps.license.manager.util.SqlConstants;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.sql.Array;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+
+/**
+ * Product DAO implementation
+ */
 
 public class ProductDAOImpl implements ProductDAO, Closeable {
 

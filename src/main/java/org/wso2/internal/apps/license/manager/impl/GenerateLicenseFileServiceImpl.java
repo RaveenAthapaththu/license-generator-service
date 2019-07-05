@@ -35,25 +35,25 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Generate License File impl
+ */
 public class GenerateLicenseFileServiceImpl {
 
     private static final Logger log = LoggerFactory.getLogger(GenerateLicenseFileServiceImpl.class);
 
-    private String licenseHeader = "\n" +
-            "This product is licensed by WSO2 Inc. under Apache License 2.0. The license\n" +
-            "can be downloaded from the following locations:\n" +
-            "\thttp://www.apache.org/licenses/LICENSE-2.0.html\n" +
-            "\thttp://www.apache.org/licenses/LICENSE-2.0.txt\n\n" +
+    private String licenseHeader = "\n" + "This product is licensed by WSO2 Inc. under Apache License 2.0. The " +
+            "license\n" + "can be downloaded from the following locations:\n" + "\thttp://www.apache" + ".org" +
+            "/licenses/LICENSE-2.0.html\n" + "\thttp://www.apache.org/licenses/LICENSE-2.0.txt\n\n" +
 
-            "This product also contains software under different licenses. This table below\n" +
-            "all the contained libraries (jar files) and the license under which they are \n" +
-            "provided to you.\n\n" +
+            "This product also contains software under different licenses. This table below\n" + "all the contained "
+            + "libraries (jar files) and the license under which they are \n" + "provided to you.\n\n" +
 
-            "At the bottom of this licenseText is a table that shows what each license indicated\n" +
-            "below is and where the actual text of the license can be found.\n\n";
+            "At the bottom of this licenseText is a table that shows what each license indicated\n" + "below is and "
+            + "where the actual text of the license can be found.\n\n";
 
-    public void generateLicenseFile(String product, String version, String packPath)
-            throws LicenseManagerDataException, IOException {
+    public void generateLicenseFile(String product, String version, String packPath) throws LicenseManagerDataException,
+            IOException {
 
         ArrayList<LibraryDetails> jarsWithLicense;
         try (LicenseDAOImpl licenseDAO = new LicenseDAOImpl()) {
@@ -64,13 +64,10 @@ public class GenerateLicenseFileServiceImpl {
 
             String formatString = String.format("%-80s%-15s%-10s\n", "Name", "Type", "License");
             licenseText += formatString;
-            licenseText +=
-                    "----------------------------------------------------------------------------------" +
-                            "-----------------------\n";
+            licenseText += "----------------------------------------------------------------------------------" +
+                    "-----------------------\n";
             for (LibraryDetails libraryDetails : jarsWithLicense) {
-                formatString = String.format("%-80s%-15s%-10s\n",
-                        libraryDetails.getName(),
-                        libraryDetails.getType(),
+                formatString = String.format("%-80s%-15s%-10s\n", libraryDetails.getName(), libraryDetails.getType(),
                         libraryDetails.getLicenseKey());
                 licenseText += formatString;
                 keys.add(libraryDetails.getLicenseKey());
@@ -80,18 +77,16 @@ public class GenerateLicenseFileServiceImpl {
             for (String key : keys) {
                 License licenseDetail = licenseDAO.getLicense(key);
                 if (licenseDetail != null) {
-                    formatString = String.format("%-15s%s\n%-15s%s\n",
-                            licenseDetail.getKey(),
-                            licenseDetail.getName(),
-                            "",
-                            licenseDetail.getUrl());
+                    formatString = String.format("%-15s%s\n%-15s%s\n", licenseDetail.getKey(),
+                            licenseDetail.getName(), "", licenseDetail.getUrl());
                 }
 
                 licenseText += formatString;
             }
-            FileWriter fw = new FileWriter(packPath + File.separator + "LICENSE(" + product + "-" + version + ").TXT");
+            try (FileWriter fw = new FileWriter(packPath + File.separator + "LICENSE-" + product + "-" + version +
+                    ".txt")) {
                 fw.write(licenseText);
-                fw.close();
+            }
         } catch (SQLException e) {
             throw new LicenseManagerDataException("Failed to retrieve licenses from database.", e);
         }

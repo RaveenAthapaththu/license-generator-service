@@ -91,9 +91,7 @@ public class LicenseManagerServiceEndpoint {
             log.error("Failed to get the list of uploaded packs. ", e);
         }
 
-        return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                .header(ACCESS_CONTROL_HEADER, true)
-                .build();
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
     }
 
     /**
@@ -105,11 +103,11 @@ public class LicenseManagerServiceEndpoint {
      * @return success/failure of starting thread
      */
     @POST
-    @Path("/pack/selectedPack")
+    //change
+    @Path("/pack/extract")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response extractJarsForSelectedPack(@Context Request request,
-                                               @QueryParam("username") String username,
+    public Response extractJarsForSelectedPack(@Context Request request, @QueryParam("username") String username,
                                                String payload) {
 
         JsonParser jsonParser = new JsonParser();
@@ -117,27 +115,28 @@ public class LicenseManagerServiceEndpoint {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         String selectedPack = jsonObject.get("packName").getAsString();
 
-        if (TaskHandler.checkForAlreadyRunningTask(selectedPack)) {
-            log.info("selected pack failed, already running pack");
-            JsonObject responseJson = new JsonObject();
-            responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.ERROR);
-            responseJson.addProperty(Constants.RESPONSE_STATUS, Constants.FAILED);
+//        if (TaskHandler.checkForAlreadyRunningTask(selectedPack)) {
+//            log.info("selected pack failed, already running pack");
+//            JsonObject responseJson = new JsonObject();
+//            responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.ERROR);
+//            responseJson.addProperty(Constants.RESPONSE_STATUS, Constants.FAILED);
+//
+//            return Response.ok(responseJson, MediaType.APPLICATION_JSON)
+//                    .header(ACCESS_CONTROL_HEADER, true)
+//                    .build();
+//        } else {
 
-            return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                    .header(ACCESS_CONTROL_HEADER, true)
-                    .build();
-        } else {
+        JsonObject responseJson = new JsonObject();
 
-            TaskProgress taskProgress = extractPackService.startPackExtractionProcess(username, selectedPack);
-            JsonObject responseJson = new JsonObject();
-            responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.SUCCESS);
-            responseJson.addProperty(Constants.RESPONSE_STATUS, Constants.RUNNING);
-            responseJson.addProperty(Constants.RESPONSE_MESSAGE, taskProgress.getMessage());
+        TaskProgress taskProgress = extractPackService.startPackExtractionProcess(username, selectedPack);
 
-            return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                    .header(ACCESS_CONTROL_HEADER, true)
-                    .build();
-        }
+        responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.SUCCESS);
+        responseJson.addProperty(Constants.RESPONSE_STATUS, Constants.RUNNING);
+        responseJson.addProperty(Constants.RESPONSE_MESSAGE, taskProgress.getMessage());
+        responseJson.addProperty(Constants.TASK_STATUS, taskProgress.getStatus());
+
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
+//        }
     }
 
     /**
@@ -150,9 +149,8 @@ public class LicenseManagerServiceEndpoint {
     @GET
     @Path("/pack/faultyNamedJars/{packName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getFaultyNamedJars(@Context Request request,
-                                       @QueryParam("username") String username,
-                                       @PathParam("packName") String packName) {
+    public Response getFaultyNamedJars(@Context Request request, @QueryParam("username") String username, @PathParam(
+            "packName") String packName) {
 
         TaskProgress taskProgress = TaskHandler.getTaskByPackName(packName);
         JsonObject responseJson = new JsonObject();
@@ -160,7 +158,8 @@ public class LicenseManagerServiceEndpoint {
         String statusMessage = taskProgress.getMessage();
 
         if (taskProgress.getStatus().equals(Constants.COMPLETE)) {
-            List<LibraryDetails> errorJarFileList = JarFileHandler.removeDuplicates(taskProgress.getData().getFaultyNamedLibs());
+            List<LibraryDetails> errorJarFileList =
+                    JarFileHandler.removeDuplicates(taskProgress.getData().getFaultyNamedLibs());
             faultyNamedJars = JsonUtils.getFaultyNamedJarsAsJsonArray(errorJarFileList);
             responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.SUCCESS);
             responseJson.addProperty(Constants.RESPONSE_MESSAGE, statusMessage);
@@ -170,9 +169,7 @@ public class LicenseManagerServiceEndpoint {
             responseJson.addProperty(Constants.RESPONSE_MESSAGE, "Failed to get data");
         }
 
-        return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                .header(ACCESS_CONTROL_HEADER, true)
-                .build();
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
     }
 
     /**
@@ -184,27 +181,25 @@ public class LicenseManagerServiceEndpoint {
      * @return list of jars in which the licenses are missing
      */
     @POST
-    @Path("/pack/nameDefinedJars")
+    @Path("/pack/add")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateNameAndVersionOfJars(@Context Request request,
-                                               @QueryParam("username") String username, String payload) {
+    public Response updateNameAndVersionOfJars(@Context Request request, @QueryParam("username") String username,
+                                               String payload) {
 
         JsonParser jsonParser = new JsonParser();
         JsonElement jsonElement = jsonParser.parse(payload);
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         String selectedPack = jsonObject.get("packName").getAsString();
 
-        TaskProgress taskProgress = updateLibDetails.startUpdatingDatabase(selectedPack, JsonUtils
-                .getAttributesFromRequestBody(payload, "jars"));
+        TaskProgress taskProgress = updateLibDetails.startUpdatingDatabase(selectedPack,
+                JsonUtils.getAttributesFromRequestBody(payload, "jars"));
         JsonObject responseJson = new JsonObject();
         responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.SUCCESS);
         responseJson.addProperty(Constants.RESPONSE_STATUS, Constants.RUNNING);
         responseJson.addProperty(Constants.RESPONSE_MESSAGE, taskProgress.getMessage());
 
-        return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                .header(ACCESS_CONTROL_HEADER, true)
-                .build();
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
     }
 
     /**
@@ -217,8 +212,7 @@ public class LicenseManagerServiceEndpoint {
     @GET
     @Path("/longRunningTask/progress/{packName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getStatusOfLongRunningTasks(@Context Request request,
-                                                @PathParam("packName") String packName) {
+    public Response getStatusOfLongRunningTasks(@Context Request request, @PathParam("packName") String packName) {
 
         TaskProgress taskProgress = TaskHandler.getTaskByPackName(packName);
         JsonObject responseJson = new JsonObject();
@@ -247,9 +241,7 @@ public class LicenseManagerServiceEndpoint {
                 break;
         }
 
-        return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                .header(ACCESS_CONTROL_HEADER, true)
-                .build();
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
     }
 
     /**
@@ -262,8 +254,7 @@ public class LicenseManagerServiceEndpoint {
     @GET
     @Path("/pack/licenseMissingJars/{packName}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getLicenseMissingJars(@Context Request request,
-                                          @QueryParam("username") String username,
+    public Response getLicenseMissingJars(@Context Request request, @QueryParam("username") String username,
                                           @PathParam("packName") String packName) {
 
         TaskProgress taskProgress = TaskHandler.getTaskByPackName(packName);
@@ -274,18 +265,16 @@ public class LicenseManagerServiceEndpoint {
             // Create the response if success
             responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.SUCCESS);
             responseJson.addProperty(Constants.RESPONSE_MESSAGE, "License missing jars were identified.");
-            responseJson.add(Constants.LICENSE_MISSING_COMPONENTS, JsonUtils.getLicenseMissingJarsAsJsonArray
-                    (packDetails.getLicenseMissingComponentLibraries()));
-            responseJson.add(Constants.LICENSE_MISSING_LIBRARIES, JsonUtils.getLicenseMissingJarsAsJsonArray
-                    (packDetails.getLicenseMissingLibraries()));
+            responseJson.add(Constants.LICENSE_MISSING_COMPONENTS,
+                    JsonUtils.getLicenseMissingJarsAsJsonArray(packDetails.getLicenseMissingComponentLibraries()));
+            responseJson.add(Constants.LICENSE_MISSING_LIBRARIES,
+                    JsonUtils.getLicenseMissingJarsAsJsonArray(packDetails.getLicenseMissingLibraries()));
         } else {
             responseJson.addProperty(Constants.RESPONSE_TYPE, Constants.ERROR);
             responseJson.addProperty(Constants.RESPONSE_MESSAGE, "Failed to get data");
         }
 
-        return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                .header("Access-Control-Allow-Credentials", true)
-                .build();
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
     }
 
     /**
@@ -297,11 +286,10 @@ public class LicenseManagerServiceEndpoint {
      * @return success/failure of adding licenses
      */
     @POST
-    @Path("license/newLicenses")
+    @Path("license/add")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response addNewLicenseForJars(@Context Request request,
-                                         @QueryParam("username") String username,
+    public Response addNewLicenseForJars(@Context Request request, @QueryParam("username") String username,
                                          String stringPayload) {
 
         JsonParser jsonParser = new JsonParser();
@@ -316,9 +304,7 @@ public class LicenseManagerServiceEndpoint {
         responseJson.addProperty(Constants.RESPONSE_STATUS, Constants.RUNNING);
         responseJson.addProperty(Constants.RESPONSE_MESSAGE, taskProgress.getMessage());
 
-        return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                .header("Access-Control-Allow-Credentials", true)
-                .build();
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
     }
 
     /**
@@ -328,7 +314,7 @@ public class LicenseManagerServiceEndpoint {
      * @return response with licenses.
      */
     @GET
-    @Path("/license/availableLicenses")
+    @Path("/licenses")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllLicenseInformation(@Context Request request) {
 
@@ -344,9 +330,7 @@ public class LicenseManagerServiceEndpoint {
             log.error("Failed to retrieve data from the database. " + e.getMessage(), e);
         }
 
-        return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                .header("Access-Control-Allow-Credentials", true)
-                .build();
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
     }
 
     /**
@@ -357,10 +341,9 @@ public class LicenseManagerServiceEndpoint {
      * @return success/failure of generating the license text
      */
     @POST
-    @Path("/license/text")
+    @Path("/license/generate")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response generateLicenseText(@Context Request request,
-                                        @QueryParam("username") String username,
+    public Response generateLicenseText(@Context Request request, @QueryParam("username") String username,
                                         String stringPayload) {
 
         JsonParser jsonParser = new JsonParser();
@@ -391,9 +374,7 @@ public class LicenseManagerServiceEndpoint {
             log.error("Failed to generate licenses for the product " + productName + "-" + productVersion, e);
         }
 
-        return Response.ok(responseJson, MediaType.APPLICATION_JSON)
-                .header("Access-Control-Allow-Credentials", true)
-                .build();
+        return Response.ok(responseJson, MediaType.APPLICATION_JSON).header(ACCESS_CONTROL_HEADER, true).build();
     }
 
     /**
@@ -404,25 +385,22 @@ public class LicenseManagerServiceEndpoint {
      * @return the license text file
      */
     @GET
-    @Path("/license/textToDownload/{packName}")
-    public Response getLicenseTextFile(@Context Request request,
-                                       @QueryParam("username") String username,
-                                       @PathParam("packName") String packName) {
+    @Path("/license/download/{packname}")
+    public Response getLicenseTextFile(@Context Request request, @QueryParam("username") String username, @PathParam(
+            "packname") String packName) {
 
         String mountPath = SystemVariableUtil.getValue(Constants.FILE_DOWNLOAD_PATH, null);
         PackDetails packDetails = TaskHandler.getTaskByPackName(packName).getData();
         String productName = packDetails.getPackName();
         String productVersion = packDetails.getPackVersion();
-        String fileName = "LICENSE(" + productName + "-" + productVersion + ").TXT";
+        String fileName = "LICENSE-" + productName + "-" + productVersion + ".txt";
         File file = Paths.get(mountPath, fileName).toFile();
         if (file.exists()) {
             // Clean the storage.
             ZipHandler.cleanFileStorage(productName + "-" + productVersion, mountPath);
             TaskHandler.deleteTaskByPackName(packName);
 
-            return Response.ok(file)
-                    .header("Access-Control-Allow-Credentials", true)
-                    .build();
+            return Response.ok(file).header(ACCESS_CONTROL_HEADER, true).build();
         } else {
             log.error("License file does not exist");
             return Response.status(Response.Status.NOT_FOUND).build();

@@ -98,7 +98,7 @@ public class UpdateLibDetailsInDBAPIServiceImpl {
         for (int i = 0; i < jarsWithDefinedNames.size(); i++) {
             JsonObject jar = jarsWithDefinedNames.get(i).getAsJsonObject();
             int index = jar.get("index").getAsInt();
-            packDetails.getFaultyNamedLibs().get(index).setProduct(jar.get("name").getAsString());
+            packDetails.getFaultyNamedLibs().get(index).setName(jar.get("name").getAsString());
             packDetails.getFaultyNamedLibs().get(index).setVersion(jar.get("version").getAsString());
         }
 
@@ -125,7 +125,7 @@ public class UpdateLibDetailsInDBAPIServiceImpl {
                 productID = productDAO.insertProduct(packDetails.getPackName(), packDetails.getPackVersion());
             }
         } catch (SQLException | IOException e) {
-            log.info("Error occured while adding Product", e);
+            log.info("Error occurred while adding Product", e);
         }
 
         List<LibraryDetails> licenseMissingLibraries = new ArrayList<>();
@@ -134,29 +134,31 @@ public class UpdateLibDetailsInDBAPIServiceImpl {
         //check if the license available for the jar file x
         //jar x -> unq(name , ver, type)
         for (LibraryDetails libraryDetails : packDetails.getLibFilesInPack()) {
-            String name = libraryDetails.getJarContent().getName();
-            String version = libraryDetails.getVersion();
-            String type = libraryDetails.getType();
 
             try (ProductDAOImpl productDAO = new ProductDAOImpl()) {
 
                 try (LibraryDAOImpl libraryDAO = new LibraryDAOImpl()) {
-                    //insert to db if not present
-                    libraryDAO.insertLib(libraryDetails);
+
                     int prodID = productDAO.getProductID(packDetails.getPackName(), packDetails.getPackVersion());
                     int libID = libraryDAO.getLibraryID(libraryDetails);
 
                     productDAO.insertLibraryProduct(libID, prodID);
+
+                    //insert to db if not present
+                    libraryDAO.insertLib(libraryDetails);
                 }
 
                 try (LicenseDAOImpl licenseDAO = new LicenseDAOImpl()) {
                     //check if license available
                     boolean isLicenseExist = licenseDAO.checkLicense(libraryDetails);
 
-                    if (!isLicenseExist && libraryDetails.getType().equals("wso2")) {
+                    //check logic, type.
+                    if (!isLicenseExist && ("wso2").equals(libraryDetails.getVendor())) {
+                        libraryDetails.setLicenseKey(licenseDAO.getLicenseForAnyVersion(libraryDetails.getName()));
                         licenseMissingComponents.add(libraryDetails);
                     } else if (!isLicenseExist) {
                         licenseMissingLibraries.add(libraryDetails);
+                        libraryDetails.setLicenseKey(licenseDAO.getLicenseForAnyVersion(libraryDetails.getName()));
                     }
 
                 }

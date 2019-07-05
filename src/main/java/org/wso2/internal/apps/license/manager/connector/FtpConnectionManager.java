@@ -74,6 +74,7 @@ public class FtpConnectionManager {
         if (ftpConnectionManager == null || !session.isConnected()) {
             ftpConnectionManager = new FtpConnectionManager();
         } else {
+            closeSftpChannel();
             try {
                 sftpChannel = (ChannelSftp) session.openChannel("sftp");
                 sftpChannel.connect();
@@ -85,7 +86,7 @@ public class FtpConnectionManager {
 
     }
 
-    public void closeSftpChannel() {
+    public static void closeSftpChannel() {
 
         if (sftpChannel != null) {
             sftpChannel.exit();

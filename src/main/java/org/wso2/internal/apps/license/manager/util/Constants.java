@@ -26,11 +26,11 @@ package org.wso2.internal.apps.license.manager.util;
 public class Constants {
 
     // Environment variables for database access.
-    public static final String DATABASE_DRIVER = "DATABASE_DRIVER";
-    public static final String DATABASE_URL = "DATABASE_URL";
-    public static final String DATABASE_USERNAME = "DATABASE_USERNAME";
-    public static final String DATABASE_PASSWORD = "DATABASE_PASSWORD";
-    public static final String DATABASE_CONNECTIONS_MAX_NUMBER = "DATABASE_CONNECTIONS_MAX_NUMBER";
+    public static final String DATABASE_DRIVER = "LM_DATABASE_DRIVER";
+    public static final String DATABASE_URL = "LM_DATABASE_URL";
+    public static final String DATABASE_USERNAME = "LM_DATABASE_USERNAME";
+    public static final String DATABASE_PASSWORD = "LM_DATABASE_PASSWORD";
+    public static final String DATABASE_CONNECTIONS_MAX_NUMBER = "LM_DATABASE_CONNECTIONS_MAX_NUMBER";
 
     // Environment variables for authentication.
     public static final String LICENSE_MANAGER_APP_USERNAME = "LICENSE_MANAGER_APP_USERNAME";
@@ -56,6 +56,7 @@ public class Constants {
     public static final String RESPONSE_MESSAGE = "responseMessage";
     public static final String RESPONSE_DATA = "responseData";
     public static final String RESPONSE_STATUS = "responseStatus";
+    public static final String TASK_STATUS = "taskStatus";
     public static final String LICENSE_MISSING_COMPONENTS = "component";
     public static final String LICENSE_MISSING_LIBRARIES = "library";
 

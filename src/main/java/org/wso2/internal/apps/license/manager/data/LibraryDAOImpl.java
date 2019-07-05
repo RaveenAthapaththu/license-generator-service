@@ -67,9 +67,10 @@ public class LibraryDAOImpl implements LibraryDAO, Closeable {
         //insert Library details to the DB
         try (PreparedStatement preparedStatement = connection.prepareStatement(SqlConstants.INSERT_LIBRARY,
                 Statement.RETURN_GENERATED_KEYS)) {
-            preparedStatement.setString(1, libraryDetails.getJarContent().getName());
+            preparedStatement.setString(1, libraryDetails.getName());
             preparedStatement.setString(2, libraryDetails.getVersion());
             preparedStatement.setString(3, libraryDetails.getType());
+            preparedStatement.setString(4, libraryDetails.getFileName());
 
             if (!(libraryExist(libraryDetails))) {
                 preparedStatement.execute();
@@ -85,20 +86,20 @@ public class LibraryDAOImpl implements LibraryDAO, Closeable {
 
         LibraryDetails libraryDetails = new LibraryDetails();
 
-        log.info("getLibraryFromID for license");
         //Get all library details from DB
         try (PreparedStatement preparedStatement = connection.prepareStatement(SqlConstants.SELECT_LIBRARY_BYID)) {
             preparedStatement.setInt(1, libID);
             try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {
-                    libraryDetails.setName(resultSet.getString("lib_Name"));
+                    //Final name is full file name. hence setName is set to lib_FileName
+                    libraryDetails.setName(resultSet.getString("lib_FileName"));
                     libraryDetails.setType(resultSet.getString("lib_Type"));
                     int libLicID = (resultSet.getInt("lib_lic_ID"));
-                    try(LicenseDAOImpl licenseDAO = new LicenseDAOImpl()){
+                    try (LicenseDAOImpl licenseDAO = new LicenseDAOImpl()) {
                         String licenceKey = licenseDAO.getLicenseKeyByID(libLicID);
                         libraryDetails.setLicenseKey(licenceKey);
 
-                    } catch (IOException e){
+                    } catch (IOException e) {
                         log.info("ERROR occurred", e);
                     }
 
@@ -139,16 +140,15 @@ public class LibraryDAOImpl implements LibraryDAO, Closeable {
         return Collections.emptyList();
     }
 
-    private boolean libraryExist(LibraryDetails libraryDetails) throws SQLException{
+    private boolean libraryExist(LibraryDetails libraryDetails) throws SQLException {
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(SqlConstants.SELECT_LIBRARY)) {
-            preparedStatement.setString(1, libraryDetails.getJarContent().getName());
+            preparedStatement.setString(1, libraryDetails.getName());
             preparedStatement.setString(2, libraryDetails.getVersion());
             preparedStatement.setString(3, libraryDetails.getType());
 
-            try(ResultSet resultSet = preparedStatement.executeQuery()){
-                log.info("results " + resultSet.first());
-               return resultSet.first();
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                return resultSet.first();
             }
         }
     }
@@ -158,24 +158,26 @@ public class LibraryDAOImpl implements LibraryDAO, Closeable {
 
         int libID;
         try (PreparedStatement preparedStatement = connection.prepareStatement(SqlConstants.SELECT_LIBRARY)) {
-            preparedStatement.setString(1, libraryDetails.getJarContent().getName());
+            preparedStatement.setString(1, libraryDetails.getName());
             preparedStatement.setString(2, libraryDetails.getVersion());
             preparedStatement.setString(3, libraryDetails.getType());
 
-            try(ResultSet resultSet = preparedStatement.executeQuery()){
+            try (ResultSet resultSet = preparedStatement.executeQuery()) {
                 if (resultSet.next()) {
                     libID = resultSet.getInt(1);
                     return libID;
                 } else {
-                    return 0;
+                    insertLib(libraryDetails);
+                    getLibraryID(libraryDetails);
                 }
             }
         }
+        return 0;
     }
 
     @Override
     public List<LibraryDetails> getAllLibrariesForLicense(ArrayList<Integer> libIDs) {
 
-        return null;
+        return Collections.emptyList();
     }
 }

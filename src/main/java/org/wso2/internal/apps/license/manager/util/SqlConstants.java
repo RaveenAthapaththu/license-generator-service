@@ -33,25 +33,24 @@ public class SqlConstants {
     }
 
     public static final String INSERT_PRODUCT = "INSERT INTO product (prod_Name, prod_Version) VALUES (?,?)";
-    public static final String INSERT_LIBRARY = "INSERT INTO  library (lib_Name, lib_Version, lib_Type) VALUES (?,?,?)";
+    public static final String INSERT_LIBRARY = "INSERT INTO  library (lib_Name, lib_Version, lib_Type, lib_FileName)" +
+            " VALUES (?,?,?,?)";
     public static final String INSERT_LIBRARY_LICENSE = "UPDATE library SET lib_lic_ID = ? WHERE lib_ID = ?";
     public static final String SELECT_ALL_LICENSES = "SELECT * FROM license";
     public static final String SELECT_PRODUCT = "SELECT prod_ID FROM product WHERE prod_Name=? AND " + "prod_Version=?";
     public static final String SELECT_LIBRARY_PRODUCT_ID = "SELECT lp_lib_ID FROM library_product WHERE lp_prod_ID=?";
-    public static final String SELECT_LIBRARY = "SELECT LIB_ID FROM library WHERE lib_Name=? AND lib_Version=? AND" +
-            " lib_Type=?";
+    public static final String SELECT_LIBRARY =
+            "SELECT LIB_ID FROM library WHERE lib_Name=? AND lib_Version=? AND" + " lib_Type=?";
     public static final String SELECT_LIBRARY_BYID = "SELECT * FROM library WHERE lib_ID=?";
     public static final String INSERT_INTO_PRODUCT_LICENSE = "INSERT IGNORE INTO library_product (lp_lib_ID, " +
             "lp_prod_ID) VALUES (?,?)";
     public static final String SELECT_LICENSE = "SELECT lic_ID FROM license WHERE lic_key=?";
     public static final String SELECT_LICENSE_KEY = "SELECT lic_Key FROM license WHERE lic_ID=?";
-    public static final String SELECT_LIBRARY_LICENSE = "SELECT * FROM library WHERE lib_Name=? AND lib_Version=? AND" +
-            " lib_Type=?";
+    public static final String SELECT_LIBRARY_LICENSE = "SELECT * FROM library WHERE lib_Name=? AND lib_Version=? " +
+            "AND" + " lib_Type=?";
     public static final String SELECT_ALL_LIBRARIES = "SELECT * FROM LIBRARY";
-    public static final String SELECT_LICENSE_FOR_ANY_COMP = "SELECT LICENSE_KEY FROM LM_COMPONENT_LICENSE WHERE " +
-            "COMP_KEY = (SELECT COMP_KEY FROM LM_COMPONENT WHERE COMP_NAME=? LIMIT 1)";
-    public static final String SELECT_LICENSE_FOR_ANY_LIB = "SELECT LICENSE_KEY FROM LM_LIBRARY_LICENSE WHERE LIB_ID " +
-            "= (SELECT LIB_ID FROM LM_LIBRARY WHERE LIB_NAME=? LIMIT 1)";
+    public static final String SELECT_LICENSE_FOR_ANY_LIB = "SELECT lic_Key FROM license WHERE lic_ID = " + "(SELECT " +
+            "lib_lic_ID FROM library WHERE lib_Name=? LIMIT 1)";
     public static final String SELECT_LICENSE_FOR_KEY = "SELECT * FROM license WHERE lic_Key=?";
 
     public static final String PRIMARY_KEY_LIBRARY = "LIB_ID";

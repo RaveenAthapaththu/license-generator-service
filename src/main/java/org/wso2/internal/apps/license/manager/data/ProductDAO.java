@@ -24,6 +24,9 @@ import java.sql.Array;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+/**
+ * Product  DAO
+ */
 public interface ProductDAO {
 
     int getProductID(String product, String version) throws SQLException;

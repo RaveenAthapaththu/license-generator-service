@@ -40,6 +40,9 @@ import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * Handles JAR files
+ */
 public class JarFileHandler {
 
     private static final Logger log = LoggerFactory.getLogger(JarFileHandler.class);
@@ -149,11 +152,16 @@ public class JarFileHandler {
 
         if (StringUtils.isEmpty(jarName) || StringUtils.isEmpty(jarVersion)) {
             jar.setValidName(false);
-            jar.setProduct(getDefaultName(fileContainingJar.getName()));
+            //jar.setProduct(getDefaultName(fileContainingJar.getName()));
+            jar.setName(getDefaultName(fileContainingJar.getName()));
+            jar.setFileName(fileContainingJar.getName());
             jar.setVersion("1.0.0");
         } else {
             jar.setValidName(true);
-            jar.setProduct(jarName);
+            jar.setName(jarName);
+            jar.setFileName(fileContainingJar.getName());
+            log.info("FILE NAME :" + fileContainingJar.getName());
+            //jar.setProduct(jarName);
             jar.setVersion(jarVersion);
         }
 
@@ -170,8 +178,7 @@ public class JarFileHandler {
         String extractedName = null;
 
         for (int i = 0; i < name.length(); i++) {
-            if ((name.charAt(i) == '-' || name.charAt(i) == '_') && (Character.isDigit(name.charAt(i + 1)) ||
-                    name.charAt(i + 1) == 'S' || name.charAt(i + 1) == 'r')) {
+            if ((name.charAt(i) == '-' || name.charAt(i) == '_') && (Character.isDigit(name.charAt(i + 1)) || name.charAt(i + 1) == 'S' || name.charAt(i + 1) == 'r')) {
 
                 extractedName = name.substring(0, i);
             }
@@ -193,8 +200,7 @@ public class JarFileHandler {
         name = name.replace(".mar", "");
 
         for (int i = 0; i < name.length(); i++) {
-            if ((name.charAt(i) == '-' || name.charAt(i) == '_') && (Character.isDigit(name.charAt(i + 1)) ||
-                    name.charAt(i + 1) == 'S' || name.charAt(i + 1) == 'r')) {
+            if ((name.charAt(i) == '-' || name.charAt(i) == '_') && (Character.isDigit(name.charAt(i + 1)) || name.charAt(i + 1) == 'S' || name.charAt(i + 1) == 'r')) {
                 extractedVersion = name.substring(i + 1, name.length());
             }
         }
@@ -221,8 +227,7 @@ public class JarFileHandler {
      * @param tempFolderToHoldJars File path to extract the jars.
      * @throws LicenseManagerRuntimeException if the jar extraction fails.
      */
-    private List<LibraryDetails> findAllJars(String tempFolderToHoldJars, List<LibraryDetails> jarFilesInPack) throws
-            LicenseManagerRuntimeException {
+    private List<LibraryDetails> findAllJars(String tempFolderToHoldJars, List<LibraryDetails> jarFilesInPack) throws LicenseManagerRuntimeException {
 
         boolean check = new File(tempFolderToHoldJars).mkdir();
 
@@ -243,12 +248,13 @@ public class JarFileHandler {
             try (java.util.jar.JarFile jarFile1 = new java.util.jar.JarFile(fileToBeExtracted)) {
                 manifest = jarFile1.getManifest();
             } catch (IOException e) {
-                throw new LicenseManagerRuntimeException("Failed to get the Manifest of the jarFile.", e);
+                throw new LicenseManagerRuntimeException(e.getMessage());
             }
             if (manifest != null) {
                 setNameAndVersionOfJar(jarFile.getJarContent(), jarFile);
-                jarFile.setType(getType(manifest, jarFile));
                 jarFile.setisBundle(getIsBundle(manifest));
+                jarFile.setType(getType(manifest, jarFile));
+                jarFile.setVendor(setVendor(manifest, jarFile));
                 if (!jarFile.isValidName()) {
                     faultyNamedJars.add(jarFile);
                 } else {
@@ -261,9 +267,8 @@ public class JarFileHandler {
                 extractTo = new File(tempFolderToHoldJars + fileToBeExtracted.getName());
                 extractTo.mkdir();
                 ZipHandler.unzip(fileToBeExtracted.getAbsolutePath(), extractTo.getAbsolutePath());
-                List<File> listOfInnerFiles = Op.onArray(extractTo
-                        .listFiles(file -> (file.getName().endsWith(".jar") || file.getName().endsWith(".mar"))))
-                        .toList().get();
+                List<File> listOfInnerFiles =
+                        Op.onArray(extractTo.listFiles(file -> (file.getName().endsWith(".jar") || file.getName().endsWith(".mar")))).toList().get();
                 for (File nextFile : listOfInnerFiles) {
                     zipStack.add(createJarObjectFromFile(nextFile, jarFile));
                 }
@@ -281,16 +286,10 @@ public class JarFileHandler {
      */
     private String getType(Manifest man, LibraryDetails jarFile) {
 
-        Attributes map = man.getMainAttributes();
-        String name = map.getValue("Bundle-Name");
-        if ((name != null && name.startsWith("org.wso2")) || (jarFile.getJarContent().getName().startsWith("org.wso2"))
-                || jarFile.getVersion().contains("wso2")) {
-            return "wso2";
-        } else {
-            if (jarFile.getParent() == null)
-                return (jarFile.isBundle()) ? Constants.JAR_TYPE_BUNDLE : Constants.JAR_TYPE_JAR;
-            else return Constants.JAR_TYPE_JAR_IN_BUNDLE;
-        }
+        if (jarFile.getParent() == null)
+            return (jarFile.isBundle()) ? Constants.JAR_TYPE_BUNDLE : Constants.JAR_TYPE_JAR;
+        else return Constants.JAR_TYPE_JAR_IN_BUNDLE;
+
     }
 
     /**
@@ -343,7 +342,7 @@ public class JarFileHandler {
         for (LibraryDetails jarFile : faultyNamedJars) {
             boolean newJar = true;
             for (LibraryDetails uniqueJarFile : faultyNamedUniqueJarFiles) {
-                if (jarFile.getProduct().equals(uniqueJarFile.getProduct())) {
+                if (jarFile.getName().equals(uniqueJarFile.getName())) {
                     newJar = false;
                 }
             }
@@ -354,4 +353,15 @@ public class JarFileHandler {
         return faultyNamedUniqueJarFiles;
     }
 
+    private String setVendor(Manifest man, LibraryDetails jarFile) {
+
+        Attributes map = man.getMainAttributes();
+        String name = map.getValue("Bundle-Name");
+        if ((name != null && name.startsWith("org.wso2")) || (jarFile.getJarContent().getName().startsWith("org.wso2")) || jarFile.getVersion().contains("wso2")) {
+            return "wso2";
+        } else {
+            return map.getValue("Bundle-Vendor");
+        }
+
+    }
 }

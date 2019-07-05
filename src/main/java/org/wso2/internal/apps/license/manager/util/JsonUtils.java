@@ -27,7 +27,6 @@ import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.internal.apps.license.manager.model.LibraryDetails;
-import org.wso2.internal.apps.license.manager.service.LicenseManagerServiceEndpoint;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -82,7 +81,7 @@ public class JsonUtils {
             JsonObject currentJar = new JsonObject();
             currentJar.addProperty("index", i);
             currentJar.addProperty("jarFileName", errorJarFileList.get(i).getJarContent().getName());
-            currentJar.addProperty("name", errorJarFileList.get(i).getProduct());
+            currentJar.addProperty("name", errorJarFileList.get(i).getName());
             currentJar.addProperty("version", errorJarFileList.get(i).getVersion());
             faultyNamedJars.add(currentJar);
         }

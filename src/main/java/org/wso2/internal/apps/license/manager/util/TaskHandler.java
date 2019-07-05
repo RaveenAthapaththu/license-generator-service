@@ -53,6 +53,7 @@ public class TaskHandler {
             TaskProgress taskProgress = new TaskProgress(username, userID, Constants.RUNNING, packName);
 
             //Store and map each task progress by pack name
+            //concurrent map?
             taskProgressMapByPackName.put(packName, taskProgress);
             return taskProgress;
         } finally {
@@ -106,7 +107,7 @@ public class TaskHandler {
     /**
      * Delete a task progress being tracked.
      *
-     * @param packName The email of the user who started the task
+     * @param packName pack name
      */
     public static void deleteTaskByPackName(String packName) {
 
