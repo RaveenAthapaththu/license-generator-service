@@ -146,7 +146,7 @@
     <properties>
         <microservice.mainClass>org.wso2.internal.apps.license.manager.service.Application</microservice.mainClass>
         <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
-        <mysql.version>5.1.9</mysql.version>
+        <mysql.version>8.0.28</mysql.version>
         <commons.lang.version>2.6</commons.lang.version>
         <gson.version>2.3.1</gson.version>
         <op4j.version>1.2</op4j.version>
